@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: journey-pgsql
+    environment:
+      - POSTGRES_DB=journey
+      - POSTGRES_USER=admin
+  app:
+    container_name: journey-app
+    build: .
+    command: ["npm", "start"]
+    ports:
+      - "3000:3000"
+    links:
+      - db:db
+    depends_on:
+      - migration
+  migration:
+    container_name: journey-migration
+    build: .
+    command: ["npm", "run", "up"]
+    depends_on:
+      - db
+

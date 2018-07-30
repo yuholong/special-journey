@@ -41,6 +41,11 @@ app.post('/route', function(req, res) {
     .then(route => {
       if (route === null) return;
       routeService.shortestPath(start, waypoints).then(path => {
+        if (path === null)
+          return routeService.updateRoute({
+            token,
+            status: 'failure'
+          });
         let _path = _.concat([start], path);
         return routeService
           .getPathDistance(start, _.without(path, start))
@@ -67,14 +72,21 @@ app.get('/route/:token', function(req, res) {
   let token = req.params.token;
   return routeService.getToken(token).then(route => {
     if (route === null) return res.send({ error: 'Invalid token.' });
-    res.send({
-      status: route.status,
-      path: JSON.parse(route.path),
-      total_distance: route.distance,
-      total_time: route.time
-    });
+    if (route.status == 'failure')
+      res.send({
+        status: 'failure',
+        error: 'Google API rate limit exceeded.'
+      });
+    else
+      res.send({
+        status: route.status,
+        path: JSON.parse(route.path),
+        total_distance: route.distance,
+        total_time: route.time
+      });
   });
 });
 
 app.listen(PORT);
+console.log(process.env.NODE_ENV);
 console.log('Running on http://localhost:' + PORT);

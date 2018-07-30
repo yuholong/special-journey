@@ -29,6 +29,7 @@ app.post('/route', function(req, res) {
   waypoints.sort();
   let token = md5(JSON.stringify({ start, waypoints }));
   res.send(token);
+  // After sending the token back, start the calculation of the shortest path
   routeService
     .getToken(token)
     .then(route => {
@@ -39,7 +40,7 @@ app.post('/route', function(req, res) {
       } else return Promise.resolve(null);
     })
     .then(route => {
-      if (route === null) return;
+      if (route === null) return; // shortest path calculated before, no work to be done
       routeService.shortestPath(start, waypoints).then(path => {
         if (path === null)
           return routeService.updateRoute({
@@ -48,21 +49,15 @@ app.post('/route', function(req, res) {
           });
         let _path = _.concat([start], path);
         return routeService
-          .getPathDistance(start, _.without(path, start))
-          .then(distance => {
-            let _distance = distance;
-            return routeService
-              .getPathTime(start, _.without(path, start))
-              .then(time => {
-                let _time = time;
-                routeService.updateRoute({
-                  token,
-                  status: 'success',
-                  path: JSON.stringify(_path),
-                  distance: _distance,
-                  time: _time
-                });
-              });
+          .getPathDetails(start, _.without(path, start))
+          .then(details => {
+            routeService.updateRoute({
+              token,
+              status: 'success',
+              path: JSON.stringify(_path),
+              distance: details['distance'],
+              time: details['time']
+            });
           });
       });
     });

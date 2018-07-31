@@ -20,7 +20,8 @@ services:
   migration:
     container_name: journey-migration
     build: .
+    restart: on-failure
     command: ["npm", "run", "up"]
     depends_on:
-      - db
+       - db
 

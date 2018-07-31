@@ -28,7 +28,7 @@ setup a config/config.json file
 ## Docker
 
 ```
-docker-compose up
+docker-compose up --build
 ```
 
 server will be running on port 3000
@@ -65,7 +65,7 @@ npm run down
 
 The API is built under an assumption that there will not be too many locations in one call (max 6 or 7). If running the api with too many waypoints, the Google API limit will probably be exceeded (especially under free tier).
 
-Token is designed as a hash of the locations (starting location + the rest sorted), so that any duplicated request in the future will not be calculated again. Similarly, distance and time between locations are stored so that the Google API quota will not be wasted to get duplicated results.
+Token is designed as a hash of the locations (starting location + the rest in sorted order), so that any duplicated request in the future will not be calculated again. Similarly, distance and time between locations are stored so that the Google API quota will not be wasted to get duplicated results.
 
 ## API
 
